@@ -1,25 +1,34 @@
-Emma Harney, Elias Hatem, Kristie Ryan, Jake Secor
+EmmEmma Harney, Elias Hatem, Kristie Ryan, Jake Secor
 
 Analytic Business Intelligence
 
 
 Trip Advisor: An Analysis
 Intro
+Domain
+•	What is trip advisor what does it do
+•	Facts/stats about trip advisor
+Motivation
+•	What are the problems/inefficiencies that trip advisor suffers from (generic)
 Business Question
 •	What factors determine ranking? Q1
 •	What type of customer is likely to give a certain rating? Q2
+•	What we did to answer Qs (overview)
 Overview of Dataset
 •	What type of variables everything is
+•	Number of rows
+•	Descriptive stats about data
 •	Any outliers, if we felt like we should remove things
+•	Visualizations of data
 
 Econometrics
 •	Correlogram- nothing is incredibly related so we would not expect high r2s?
-o	Only think that is related is vote and helpfulness of review- which intuitively makes sense but does not tell us much about the data
+o	Only think that is related is vote and helpfulness of review- which intuitively makes sense but does not tell us much about the data (correlations)
 
  
 
 
-•	OLS- all numeric- service, vibe, desert, bathroom, drink, cost, music, location, parking, lunch, breakfast, dinner, totalreviewsofreviewer, avghelpfulnessofreviewer (Q1)
+•	OLS- all numeric- service, vibe, desert, bathroom, drink, cost, music, location, parking, lunch, breakfast, dinner, totalreviewsofreviewer, avghelpfulnessofreviewer (Q1) (Model Selection)
 o	R2 value= .03185
 o	Significant variables ***= service, vibe, desert, bathroom, cost, music, location, lunch, breakfast, totalreviewsofreviewer, avghepfulnessofreviewer
 o	Significant variables **= parking
@@ -27,7 +36,10 @@ o	Significant variables . =dinner
 •	OLS- only significant variables- same r2 (Q1)
 •	OLS- positive words in review (Q1)
 •	OLS- Only significant ones (Q1)
-•	OLS- reviewer type (Q2)
+•	OLS- reviewer type (Q2) (Feature Engineering)
+•	Discuss the goodness of fit of the model (R^2, AIC etc.)
+•	Discuss the significant coefficients (show the table and highlight the coefficients of interest) 
+•	Explain how the set of independent variables affect the dependent variables
 
 Data Mining
 •	Word Cloud
@@ -35,8 +47,16 @@ Data Mining
 •	AUC
 •	NB
 •	SVM
+•	Mention that you split the data into training and test sets and how you did it
+•	Show the accuracies (and the accuracy curves if applicable) 
+•	Show the AUC scores, and explain why this model is good or bad 
+•	If you compared multiple models try to visualize their performance
+•	
 
 Conclusions
+•	Overview
 •	Answer business question
+•	Main takeaways
 •	Make recommendations
 •	Other questions we would want to look further into
+
