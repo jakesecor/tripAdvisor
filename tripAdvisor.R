@@ -6,12 +6,21 @@ taData <- read.csv(file= "C:\\Users\\Elias\\Documents\\BC Junior Year\\Analytics
 
 head(taData)
 
+
 # poisson to see significance of independent variables
-poisson <- glm(rating ~ service + vibe +  desert + bathroom + drink + cost + music + location + parking + lunch + breakfast + dinner + totalReviewsOfReviewer + avgHelpfulnessOfReviewer, family="poisson", data =taData)
+poisson <- glm(rating ~ service + vibe +  desert + bathroom + drink + cost + music + location + parking + lunch + breakfast + dinner + totalReviewsOfReviewer + totalReviewsOfReviewer + avgHelpfulnessOfReviewer, family="poisson", data = taData)
 summary(poisson)
 
 
 # marginal effects of independent variables
 library(mfx)
 
-poissonmfx(rating ~ service + vibe +  desert + bathroom + drink + cost + music + location + parking + lunch + breakfast + dinner + totalReviewsOfReviewer + avgHelpfulnessOfReviewer, data =taData)
+poissonmfx(rating ~ service + vibe +  desert + bathroom + drink + cost + music + location + parking + lunch + breakfast + dinner + totalReviewsOfReviewer + totalReviewsOfReviewer + avgHelpfulnessOfReviewer, data = taData)
+
+
+# service + vibe +  desert + bathroom + drink + cost + music + location + parking + lunch + breakfast + dinner + totalReviewsOfReviewer + avgHelpfulnessOfReviewer,
+
+olsReg <- lm(rating ~ service + vibe +  desert + bathroom + drink + cost + music + location + parking + lunch + breakfast + dinner + totalReviewsOfReviewer + totalReviewsOfReviewer + avgHelpfulnessOfReviewer, data = taData)
+# Ordinary Least Squares
+summary(olsReg)
+
