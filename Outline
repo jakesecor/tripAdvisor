@@ -1,0 +1,42 @@
+Emma Harney, Elias Hatem, Kristie Ryan, Jake Secor
+
+Analytic Business Intelligence
+
+
+Trip Advisor: An Analysis
+Intro
+Business Question
+•	What factors determine ranking? Q1
+•	What type of customer is likely to give a certain rating? Q2
+Overview of Dataset
+•	What type of variables everything is
+•	Any outliers, if we felt like we should remove things
+
+Econometrics
+•	Correlogram- nothing is incredibly related so we would not expect high r2s?
+o	Only think that is related is vote and helpfulness of review- which intuitively makes sense but does not tell us much about the data
+
+ 
+
+
+•	OLS- all numeric- service, vibe, desert, bathroom, drink, cost, music, location, parking, lunch, breakfast, dinner, totalreviewsofreviewer, avghelpfulnessofreviewer (Q1)
+o	R2 value= .03185
+o	Significant variables ***= service, vibe, desert, bathroom, cost, music, location, lunch, breakfast, totalreviewsofreviewer, avghepfulnessofreviewer
+o	Significant variables **= parking
+o	Significant variables . =dinner
+•	OLS- only significant variables- same r2 (Q1)
+•	OLS- positive words in review (Q1)
+•	OLS- Only significant ones (Q1)
+•	OLS- reviewer type (Q2)
+
+Data Mining
+•	Word Cloud
+•	Accuracy
+•	AUC
+•	NB
+•	SVM
+
+Conclusions
+•	Answer business question
+•	Make recommendations
+•	Other questions we would want to look further into
