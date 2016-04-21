@@ -50,3 +50,15 @@ taData$dollarChar <- as.character(taData$dollars)
 taData$dollarAmt <- ifelse(tolower(substr(taData$dollarChar, 1, 1)) == 'n', 0, nchar(as.vector(taData$dollars)))
 
 head(taData)
+
+taData$ratingBinary <- ifelse(taData$rating > 3, 1, 0)
+logit <- glm(ratingBinary ~ cost + service, data = taData, family = "binomial")
+summary(logit)
+
+logitCost <- glm(ratingBinary ~ cost, data = taData, family = "binomial")
+summary(logitCost)
+
+logitService <- glm(ratingBinary ~ service, data = taData, family = "binomial")
+summary(logitService)
+
+cat("logBoth: 182757, logitService: 184643, logitCost: 182895")
