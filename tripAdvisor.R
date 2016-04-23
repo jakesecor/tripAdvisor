@@ -51,7 +51,10 @@ taData$dollarAmt <- ifelse(tolower(substr(taData$dollarChar, 1, 1)) == 'n', 0, n
 
 head(taData)
 
+# convert to rating to binary
 taData$ratingBinary <- ifelse(taData$rating > 3, 1, 0)
+
+
 logit <- glm(ratingBinary ~ cost + service, data = taData, family = "binomial")
 summary(logit)
 
@@ -61,4 +64,34 @@ summary(logitCost)
 logitService <- glm(ratingBinary ~ service, data = taData, family = "binomial")
 summary(logitService)
 
-cat("logBoth: 182757, logitService: 184643, logitCost: 182895")
+cat("logitBoth: 182757, logitService: 184643, logitCost: 182895")
+
+# run runLogit with dataset, string targetVar, and string vector for inptVars
+# for example: runLogit(taData, "ratingBinary", c("breakfast", "lunch", "dinner")
+# prints summary and returns variables string
+runLogit <- function(dataset, targetVar, inptVars) {
+  inptToString <- ""
+  for (thisone in inptVars) {
+    if (inptToString == "") {
+      inptToString <- thisone
+    }
+    else {
+      inptToString <- paste (inptToString, thisone, sep=" + ")
+    }
+  }
+  frm<-paste(targetVar,inptToString, sep=" ~ ")
+  
+  myModel <- glm(formula(frm),data=dataset,family="binomial")
+  print(summary(myModel))
+  return (frm)
+}
+
+cat(runLogit(taData, "ratingBinary", c("breakfast", "lunch", "dinner")), "has AIC of 184724")
+cat(runLogit(taData, "ratingBinary", c("breakfast")), "has AIC of 184774")
+cat(runLogit(taData, "ratingBinary", c("lunch")), "has AIC of 184833")
+cat(runLogit(taData, "ratingBinary", c("dinner")), "has AIC of 184889")
+cat(runLogit(taData, "ratingBinary", c("breakfast", "lunch")), "has AIC of 184724")
+cat(runLogit(taData, "ratingBinary", c("breakfast", "dinner")), "has AIC of 184772")
+cat(runLogit(taData, "ratingBinary", c("lunch", "dinner")), "has AIC of 184833")
+
+
