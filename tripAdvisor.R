@@ -51,9 +51,9 @@ taData$dollarAmt <- ifelse(tolower(substr(taData$dollarChar, 1, 1)) == 'n', 0, n
 
 head(taData)
 
-# convert to rating to binary
-taData$ratingBinary <- ifelse(taData$rating > 3, 1, 0)
 
+
+# logit stuff - NOTE: ratingBinary no longer exists - see binary bucketing below
 
 logit <- glm(ratingBinary ~ cost + service, data = taData, family = "binomial")
 summary(logit)
@@ -68,7 +68,7 @@ cat("logitBoth: 182757, logitService: 184643, logitCost: 182895")
 
 # run runLogit with dataset, string targetVar, and string vector for inptVars
 # for example: runLogit(taData, "ratingBinary", c("breakfast", "lunch", "dinner")
-# prints summary and returns variables string
+# prints summary and variables string with AIC, returns AIC
 runLogit <- function(dataset, targetVar, inptVars) {
   inptToString <- ""
   for (thisone in inptVars) {
@@ -83,7 +83,8 @@ runLogit <- function(dataset, targetVar, inptVars) {
   
   myModel <- glm(formula(frm),data=dataset,family="binomial")
   print(summary(myModel))
-  return (frm)
+  cat(frm, " has AIC: ", AIC(myModel), sep="")
+  return (AIC(myModel))
 }
 
 cat(runLogit(taData, "ratingBinary", c("breakfast", "lunch", "dinner")), "has AIC of 184724")
@@ -94,4 +95,95 @@ cat(runLogit(taData, "ratingBinary", c("breakfast", "lunch")), "has AIC of 18472
 cat(runLogit(taData, "ratingBinary", c("breakfast", "dinner")), "has AIC of 184772")
 cat(runLogit(taData, "ratingBinary", c("lunch", "dinner")), "has AIC of 184833")
 
+
+runLogit(taData, "ratingBinary", c("avgHelpful"))
+
+# getACC needs a matrix in table form
+getACC <- function(matrix) {
+  correct = 0
+  for (i in 1:length(matrix)) {
+    correct = correct + matrix[i,i]
+  }
+  return (correct/sum(matrix))
+}
+
+m <- table(c(1,1,1,1),c(1,1,1,1),c(1,1,1,1),c(1,1,1,1))
+head(taData)
+
+taData[taData$breakfast==1 && taData$lunch==1,]
+
+
+# Binary buketing - below are different ways of converting ratings to binary values. 
+
+# printInfo prints out how many good/bad values exist in a given column
+printInfo <- function(split, colname) {
+  ngood <- nrow(taData[colname == 1,])
+  goodperc <- ngood/nrow(taData)*100
+  nbad <- nrow(taData[colname == 0,])
+  badperc <- nbad/nrow(taData)*100
+  cat("When bucketing rating ", split+1, " or higher as good and rating ", split, " or lower as bad, there are ", ngood, " good ratings (", goodperc, "%) and ", nbad, " bad ratings (", badperc, "%).", sep="")
+  return (c(split, ngood, goodperc, nbad, badperc))
+}
+
+
+# the following code buckets ratings into good/bad with various split values
+# creates a table binDF that shows how many are labeled good and bad
+taData$ratingBinaryOne <- ifelse(taData$rating > 1, 1, 0)
+one <- printInfo(1, taData$ratingBinaryOne)
+
+taData$ratingBinaryTwo <- ifelse(taData$rating > 2, 1, 0)
+two <- printInfo(2, taData$ratingBinaryTwo)
+
+taData$ratingBinaryThree <- ifelse(taData$rating > 3, 1, 0)
+three <- printInfo(3, taData$ratingBinaryThree)
+
+taData$ratingBinaryFour <- ifelse(taData$rating > 4, 1, 0)
+four <- printInfo(4, taData$ratingBinaryFour)
+
+binDF <- rbind(one, two, three, four)
+colnames(binDF) <- c('maxBadVal', 'Good', 'Good %', 'Bad', 'Bad %')
+
+binDF
+
+
+
+# the code below checks each meal with each split value and puts the result into the dataframe tout
+num <- c()
+aicval <- c()
+meal <- c()
+i <- 1
+for (numcheck in c('ratingBinaryOne', 'ratingBinaryTwo', 'ratingBinaryThree', 'ratingBinaryFour')) {
+  for (thisone in c('breakfast','lunch','dinner')) {
+    num <- c(num, i)
+    meal <- c(meal, thisone)
+    aicval <- c(aicval, runLogit(taData, numcheck, c(thisone)))
+  }
+  i <- i+1
+}
+tout <- rbind(num, meal, aicval)
+colnames(tout) <- c(1:12)
+tout
+
+
+# bag of words stuff
+library(tm)
+library(SnowballC) 
+library(wordcloud)
+
+corpus <- Corpus(VectorSource(taData$reviewText))
+corpus <- tm_map(corpus, content_transformer(tolower))
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
+corpus <- tm_map(corpus, stripWhitespace)
+corpus <- tm_map(corpus, stemDocument)
+corpus <- tm_map(corpus, removeNumbers)
+dtm <- DocumentTermMatrix(corpus)
+inspect(dtm[1:5, 1:20])
+
+freq <- colSums(as.matrix(dtm)) # error
+head(freq)
+
+
+binary <- weightBin(dtm)
+binarys <- removeSparseTerms(binary, 0.99)
 
