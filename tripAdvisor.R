@@ -179,9 +179,12 @@ corpus <- tm_map(corpus, stemDocument)
 corpus <- tm_map(corpus, removeNumbers)
 dtm <- DocumentTermMatrix(corpus)
 inspect(dtm[1:5, 1:20])
+dtm <- removeSparseTerms(dtm, 0.99)
 
 freq <- colSums(as.matrix(dtm)) # error
 head(freq)
+
+wordcloud(names(freq), freq, min.freq=300,colors=brewer.pal(9,"Spectral"))
 
 
 binary <- weightBin(dtm)
