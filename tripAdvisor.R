@@ -236,5 +236,36 @@ cat("Reviews that mention customer(s) tend to give lower ratings", "Mentioning c
 middleGone <- updateTerm(middleGone, '[Ww]ines?')
 runLogit(middleGone, 'ratingBinary', c('containsTerm'))
 
+
+middleGone <- updateTerm(middleGone, '[Gg]ood|[Gg]reat|[Ww]onder(ful)?|[Ee]xcellent|[Ff]antastic')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Bb]ad|[Tt]errible|[Hh]orrible|[Aa]wful|[Oo]k(ay)?')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, 'steak')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, 'chicken')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+
+middleGone <- updateTerm(middleGone, 'vibe')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+
+middleGone <- updateTerm(middleGone, '([Gg]ood|[Gg]reat|[Ww]onder(ful)?|[Ee]xcellent|[Ff]antastic)')
+
+middleGone <- updateTerm(middleGone, '([Bb]ad|[Tt]errible|[Hh]orrible|[Aa]wful|[Oo]k(ay)?|[Ss]low).service')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+
 library(mfx)
 logitmfx(ratingBinary ~ containsTerm, data = middleGone)
+
+
+nrow(taData[taData$rating == 1,])/nrow(taData)
+nrow(taData[taData$rating == 2,])/nrow(taData)
+nrow(taData[taData$rating == 3,])/nrow(taData)
+nrow(taData[taData$rating == 4,])/nrow(taData)
+nrow(taData[taData$rating == 5,])/nrow(taData)
