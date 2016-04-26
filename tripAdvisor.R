@@ -83,7 +83,7 @@ runLogit <- function(dataset, targetVar, inptVars) {
   
   myModel <- glm(formula(frm),data=dataset,family="binomial")
   print(summary(myModel))
-  cat(frm, " has AIC: ", AIC(myModel), sep="")
+  cat(frm, " has AIC: ", AIC(myModel), "\n", sep="")
   return (AIC(myModel))
 }
 
@@ -181,7 +181,7 @@ dtm <- DocumentTermMatrix(corpus)
 inspect(dtm[1:5, 1:20])
 dtm <- removeSparseTerms(dtm, 0.99)
 
-freq <- colSums(as.matrix(dtm)) # error
+freq <- colSums(as.matrix(dtm))
 head(freq)
 
 wordcloud(names(freq), freq, min.freq=300,colors=brewer.pal(9,"Spectral"))
@@ -190,3 +190,51 @@ wordcloud(names(freq), freq, min.freq=300,colors=brewer.pal(9,"Spectral"))
 binary <- weightBin(dtm)
 binarys <- removeSparseTerms(binary, 0.99)
 
+# regex stuff
+head(taData)
+
+updateTerm <- function(df, regexp) {
+  df$containsTerm <- ifelse(grepl(regexp,df$reviewText), 1, 0)
+  return (df)
+}
+
+# OLS of standardized logs
+taData$ratingLog <- log(taData$rating)
+taData$scaledRating <- scale(taData$ratingLog)
+olsReg <- lm(scaledRating ~ containsTerm, data = taData)
+summary(olsReg)
+
+# graph to see if normal distribution
+library(ggplot2)
+library(grid)
+ggplot(taData, aes(x=scaledRating, fill = dollars))+geom_histogram()+
+  theme_bw(base_size = 18)+
+  xlab("Log of Rating")+
+  ylab("Count")+
+  theme(legend.position = "right",axis.title.y = element_text(vjust=-0.05),axis.text.x = element_text( vjust=0.6, hjust = 0),plot.margin = unit(c(1, 1, 1, 1), "cm"))
+
+
+# rating -> ratingBinary: 5->1, 1->0, 2-4->-1
+taData$ratingBinary <- ifelse(taData$rating == 5, 1, ifelse(taData$rating == 1, 0, -1))
+head(taData)$ratingBinary
+middleGone <- taData[taData$ratingBinary > -1,]
+head(middleGone)
+nrow(middleGone)
+nrow(taData)
+
+middleGone <- updateTerm(middleGone, '([Cc]hild(ren)?)|[Kk]ids?')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+head(middleGone)
+cat("Reviews that mention kids tend to give lower ratings")
+
+middleGone <- updateTerm(middleGone, 'free')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, 'customers?')
+cat("Reviews that mention customer(s) tend to give lower ratings", "Mentioning customer(s) lowers the binary rating by 0.25", "AIC:", runLogit(middleGone, 'ratingBinary', c('containsTerm')), sep="\n")
+
+middleGone <- updateTerm(middleGone, '[Ww]ines?')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+library(mfx)
+logitmfx(ratingBinary ~ containsTerm, data = middleGone)
