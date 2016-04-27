@@ -98,6 +98,10 @@ cat(runLogit(taData, "ratingBinary", c("lunch", "dinner")), "has AIC of 184833")
 
 runLogit(taData, "ratingBinary", c("avgHelpful"))
 
+getACC <- function(cnfussionMatrix) {
+  return ((cnfussionMatrix[1,1]+cnfussionMatrix[2,2])/sum(cnfussionMatrix))
+}
+
 # getACC needs a matrix in table form
 getACC <- function(matrix) {
   correct = 0
@@ -254,18 +258,109 @@ middleGone <- updateTerm(middleGone, 'vibe')
 runLogit(middleGone, 'ratingBinary', c('containsTerm'))
 
 
-middleGone <- updateTerm(middleGone, '([Gg]ood|[Gg]reat|[Ww]onder(ful)?|[Ee]xcellent|[Ff]antastic)')
+middleGone <- updateTerm(middleGone, '([Gg]ood|[Gg]reat|[Ww]onder(ful)?|[Ee]xcellent|[Ff]antastic).vibe')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '([Gg]ood|[Gg]reat|[Ww]onder(ful)?|[Ee]xcellent|[Ff]antastic).service')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
 
 middleGone <- updateTerm(middleGone, '([Bb]ad|[Tt]errible|[Hh]orrible|[Aa]wful|[Oo]k(ay)?|[Ss]low).service')
 runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Ii]nexpensive')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Cc]heap')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[C')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Pp]arty')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Bb]irth(day)?|[Pp]arty|[Ee]vent')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Dd]anger')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Gg]reasy|[Ff]at(ty)?|[Hh]eavy')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Gg]reasy|[Ff]at(ty)?|[Hh]eavy')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Ff]riend(ly)?|[Hh]elp(ful)?|[Aa]ttent(ive|ion)?')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+middleGone <- updateTerm(middleGone, '[Ss]ervice')
+runLogit(middleGone, 'ratingBinary', c('containsTerm'))
+
+
+head(middleGone$reviewText[(middleGone$ratingBinary == 1 && middleGone$containsTerm == 1)])
 
 
 library(mfx)
 logitmfx(ratingBinary ~ containsTerm, data = middleGone)
 
-
+# find the mode
 nrow(taData[taData$rating == 1,])/nrow(taData)
 nrow(taData[taData$rating == 2,])/nrow(taData)
 nrow(taData[taData$rating == 3,])/nrow(taData)
 nrow(taData[taData$rating == 4,])/nrow(taData)
 nrow(taData[taData$rating == 5,])/nrow(taData)
+
+
+
+# predictive models
+randomDf <- middleGone[sample(nrow(middleGone)),]
+nrow(randomDf)
+train <- randomDf[1:70000,]
+test <- randomDf[70001:nrow(randomDf),]
+
+nrow(test)
+
+mylogit <- glm(ratingBinary ~ containsTerm, data = train, family = "binomial")
+summary(mylogit)
+
+predictedProbs <- predict(mylogit, test,type="response")
+predLogistic <- as.data.frame(predictedProbs)
+
+colnames(predLogistic) <- c('prob1')
+head(predLogistic)
+predLogistic$predictedClass <- ifelse(predLogistic$prob1 >= 0.5,1,0)
+
+cnfussionMatrix<-table(predLogistic$predictedClass, test$ratingBinary)
+cnfussionMatrix
+
+sum(cnfussionMatrix)
+nrow(test)
+
+getACC(cnfussionMatrix)
+
+#library(ROCR)
+
+pLogistic <- prediction(predLogistic$prob1,test$ratingBinary)
+perf <- performance(pLogistic,"acc")
+plot(perf)
+abline(v=0.5)
+
+perfLogistic <- performance(pLogistic, "tpr","fpr")
+plot(perfLogistic)
+abline(a=0, b=1)
+aucLogistic <- performance(pLogistic,"auc")
+#perf
+aucLogisticScore <- unlist(slot(aucLogistic, "y.values"))
+aucLogisticScore
+
+
+
+# dollar analysis
+head(taData)
+runLogit(middleGone, 'ratingBinary', c('dollarAmt'))
+head(middleGone)
+
+
+
+
