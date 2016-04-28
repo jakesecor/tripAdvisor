@@ -114,7 +114,6 @@ getACC <- function(matrix) {
 m <- table(c(1,1,1,1),c(1,1,1,1),c(1,1,1,1),c(1,1,1,1))
 head(taData)
 
-taData[taData$breakfast==1 && taData$lunch==1,]
 
 
 # Binary buketing - below are different ways of converting ratings to binary values. 
@@ -226,6 +225,8 @@ head(middleGone)
 nrow(middleGone)
 nrow(taData)
 
+nrow(middleGone[middleGone$ratingBinary == 0,])
+
 middleGone <- updateTerm(middleGone, '([Cc]hild(ren)?)|[Kk]ids?')
 runLogit(middleGone, 'ratingBinary', c('containsTerm'))
 head(middleGone)
@@ -319,7 +320,11 @@ nrow(randomDf)
 train <- randomDf[1:70000,]
 test <- randomDf[70001:nrow(randomDf),]
 
+nrow(train[train$ratingBinary == 0,])
+nrow(test[test$ratingBinary == 0,])
+
 nrow(test)
+head(train)
 
 mylogit <- glm(ratingBinary ~ containsTerm, data = train, family = "binomial")
 summary(mylogit)
@@ -353,8 +358,6 @@ aucLogistic <- performance(pLogistic,"auc")
 #perf
 aucLogisticScore <- unlist(slot(aucLogistic, "y.values"))
 aucLogisticScore
-
-
 
 # dollar analysis
 head(taData)
